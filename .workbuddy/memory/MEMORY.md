@@ -24,6 +24,9 @@
 - **开启 Pages 不必进设置页**：推一条 `git push origin main:gh-pages` 即可让仓库自动启用 Pages（实测 has_pages 由 False 变 True、站点立即可访问）。
 - **actions/deploy-pages 工作流在 Pages 未启用时必失败**（失败步骤为「配置 Pages」），因为它要求发布源是 GitHub Actions 而非分支。故本项目工作流改为「同步 main → gh-pages」的轻量分支同步，不做构建。
 - 手动发布：`git push origin main:gh-pages`；工作流会在 main 有更新时自动同步。
+- **访问模型**：GitHub Pages 完全公开、任何人可访问；WorkBuddy 发布链接的 `?sharecode=` 就是访问凭证——带正确码匿名访问 200（无需登录 WorkBuddy 账号），缺码或错码 403。完整链接等同密码，转发即等于分享访问权。
+- **线上可用性已实测**：用 CDP 驱动无头 Edge 打开两个线上地址，各 14 项断言全过——HTTPS 安全上下文（通知 API 可用）、初始 25:00、点开始后 2.5 秒显示 24:58、暂停冻结、主按钮与标题联动、LocalStorage 可写、控制台与资源加载零问题。
+- 访问者的数据互不影响：LocalStorage 按浏览器各自独立；今日/本周统计按各自本地时区计算；通知权限需对方首次点击时在浏览器弹窗里允许，被拒则降级为页面内提示。
 
 ## 阶段 5 已完成（端到端验收通过）
 PRD §5 五项 + AGENTS.md 九项 + PRD §4 非功能需求全部实测通过。脚本在 `%TEMP%/pomo-verify/s5/`（不进仓库）：
