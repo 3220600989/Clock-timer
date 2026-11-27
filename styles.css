@@ -125,6 +125,12 @@ body {
   font: inherit;
 }
 
+/* 保存按钮独占一行，避免与休息时长输入框并排显得拥挤 */
+.settings .btn {
+  display: block;
+  margin: 0 auto;
+}
+
 .stats div {
   margin-bottom: 8px;
 }

@@ -14,11 +14,20 @@
 | index.html / styles.css | 界面（14 个 id 与 app.js 一致；已加 data: 空图标避免 favicon 404） | 已接线 |
 | assets/ | 静态资源目录，无音频文件（阶段 0 决策：改用 Web Audio 合成音） | — |
 
-## 下一步：阶段 5
-只剩端到端验收：PRD §5 五项 + AGENTS.md 清单九项（通知须用本地 http 服务验证，file:// 下受限）。
+## 状态：阶段 5 已完成（端到端验收通过）
+PRD §5 五项 + AGENTS.md 九项 + PRD §4 非功能需求全部实测通过。脚本在 `%TEMP%/pomo-verify/s5/`（不进仓库）：
+- `drive-stage5.mjs` 主驱动（场景 1–9，80/82，两处失败均为脚本自身时序/断言问题，已修正并单独复测通过）
+- `drive-basic-only.mjs` 场景 1 复测 31/31；`drive-finish-only.mjs` 场景 5 复测 15/15
+- `drive-a11y.mjs` 可访问性 15/15（真实 Tab/Enter/Space 按键 + ARIA 语义）
+- `drive-longrun2.mjs` 长时运行等效验证（加速时钟 20 倍，40 分钟虚拟时长）+ `verify-metric.mjs` 证明度量可区分累加式
+- `drive-shots.mjs` 界面截图；`drive-console.mjs` 控制台零报错
 
-- **阶段 5 重点**：切标签页 30 秒后返回的剩余时间误差 ≤1s（真机人工走查，timer.js 侧已用假时钟验证过）；通知在 granted/denied 两种权限下的表现；首屏资源体积 <100KB。
-- 阶段 3–4 的自动化验证脚本在 `%TEMP%/pomo-verify/`（不进仓库）：`drive-stage4.mjs` 用 CDP 驱动无头 Edge 跑 61 项断言，`drive-console.mjs` 查控制台报错。Node 22 自带全局 WebSocket，可零依赖写 CDP 客户端。
+## 阶段 5 验收结论
+- **切标签页 30 秒返回**：误差 ≤1s 通过（真实 CDP 切 target，visibilityState 确实 hidden）。实测后台 200ms 定时器 5 秒仅触发 4 次（浏览器节流），这正是必须用 `endAt - Date.now()` 推导的原因。
+- **通知三态**：granted（注入替身验证标题/正文/计数+1）、denied（友好提示、requestPermission 调用 0 次）、unsupported（降级页面内提醒）全部通过。
+- **长时运行等效**：40 分钟虚拟时长逐点误差与漂移跨度均 ≤2s；累加式实现会达 2,160,000ms 量级，度量已验证可区分。
+- **首屏体积**：21,766 B ≈ 21.3KB（gzip 8.2KB），远低于 100KB 上限。
+- **可访问性**：6 个按钮均有文字、Tab 顺序正确、Enter/Space 可激活、label/aria-live/role=status 齐备。
 
 ## 阶段 4 已交付要点（app.js）
 - 4a render()：时间文本、主按钮文案（开始/暂停/继续）、模式标签与两枚模式按钮激活态、今日/本周计数、document.title 三态（`MM:SS · 专注中` / `· 已暂停` / `番茄钟`）。
