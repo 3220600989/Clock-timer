@@ -10,15 +10,24 @@
 | storage.js | LocalStorage 读写（pomo.settings / pomo.records），内存态降级 | 已实现并验证 |
 | timer.js | 计时状态机 idle/running/paused + focus/break，200ms tick | 已实现并验证 |
 | notify.js | 通知 + 提示音（Web Audio 合成音） | 已实现并验证 |
-| app.js | 唯一操作 DOM 的集成层 | 待做（阶段 4，骨架 TODO 占位） |
-| index.html / styles.css | 骨架，14 个 id 与 app.js 引用一致 | 待接线（阶段 4） |
+| app.js | 唯一操作 DOM 的集成层 | 已实现并验证 |
+| index.html / styles.css | 界面（14 个 id 与 app.js 一致；已加 data: 空图标避免 favicon 404） | 已接线 |
 | assets/ | 静态资源目录，无音频文件（阶段 0 决策：改用 Web Audio 合成音） | — |
 
-## 下一步：阶段 4 → 5
-先做阶段 4：app.js 是把前三个模块接到界面上的唯一入口，也是 PRD 验收项的唯一落点。
+## 下一步：阶段 5
+只剩端到端验收：PRD §5 五项 + AGENTS.md 清单九项（通知须用本地 http 服务验证，file:// 下受限）。
 
-- **阶段 4 app.js**：4a render()（时间文本 / 按钮文案 / 模式标签激活态 / 统计 / document.title 三态）→ 4b 事件（主按钮按 status 分发 start/pause/resume、重置、模式切换带 idle 校验）→ 4c 设置（时长 1–120 整数校验、非 idle 提示「请先重置计时器」、提示音开关落 storage）→ 4d 统计（startOfToday / startOfWeek 周一起点、清空记录二次确认）→ 4e handleFinish（音 + 通知 + 页面内提示 + 专注计数 +1 + 自动切模式但不自动开始）→ 4f visibilitychange 补 tick。
-- **阶段 5**：端到端验收（PRD §5 五项 + AGENTS.md 清单九项；通知须用本地 http 服务验证，file:// 下受限）+ 提交推送。
+- **阶段 5 重点**：切标签页 30 秒后返回的剩余时间误差 ≤1s（真机人工走查，timer.js 侧已用假时钟验证过）；通知在 granted/denied 两种权限下的表现；首屏资源体积 <100KB。
+- 阶段 3–4 的自动化验证脚本在 `%TEMP%/pomo-verify/`（不进仓库）：`drive-stage4.mjs` 用 CDP 驱动无头 Edge 跑 61 项断言，`drive-console.mjs` 查控制台报错。Node 22 自带全局 WebSocket，可零依赖写 CDP 客户端。
+
+## 阶段 4 已交付要点（app.js）
+- 4a render()：时间文本、主按钮文案（开始/暂停/继续）、模式标签与两枚模式按钮激活态、今日/本周计数、document.title 三态（`MM:SS · 专注中` / `· 已暂停` / `番茄钟`）。
+- 4b 事件：主按钮按 status 分发；首次点击在用户手势内请求通知权限并解锁音频（permissionRequested 只请求一次）；模式切换与改时长在非 idle 时提示「请先重置计时器」。
+- 4c 设置：toMinutes() 只接受 1–120 的纯整数字符串（拒绝 0/121/25.5/abc/空），提示音开关落 storage。
+- 4d 统计：startOfToday / startOfWeek（周一起点），清空记录走 window.confirm 二次确认。
+- 4e handleFinish：提示音 + 系统通知 + 页面内提示 + 专注计数 +1 + 自动切模式但不自动开始。
+- 4f visibilitychange 切回前台补 tick。
+- 验证：CDP 驱动无头 Edge 端到端 61 项断言全过（含真实等待 1 分钟的到时链路、刷新持久化）；交互路径控制台零报错。
 
 ## 阶段 3 已交付要点（notify.js）
 - 导出：MESSAGES / ensurePermission / notify / notifyForMode / setSoundEnabled / isSoundEnabled / unlockAudio / playChime。

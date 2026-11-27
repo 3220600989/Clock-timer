@@ -1,13 +1,12 @@
 /**
- * 入口（骨架）：DOM 引用、事件绑定、渲染。
- * 约定：DOM 操作只放本文件。
+ * 入口：DOM 引用、事件绑定、渲染。
+ * 约定：DOM 操作只放本文件；存储走 storage.js；计时走 timer.js；通知与音频走 notify.js。
  */
-import { Timer, MODES, STATUS } from './timer.js';
+import { Timer, MODES, STATUS, formatTime } from './timer.js';
 import {
   loadSettings,
   saveSettings,
   loadRecords,
-  saveRecords,
   addRecord,
   clearRecords,
 } from './storage.js';
@@ -37,8 +36,16 @@ const el = {
   notice: document.getElementById('notice'),
 };
 
+const MODE_LABELS = { [MODES.FOCUS]: '专注', [MODES.BREAK]: '休息' };
+const PRIMARY_LABELS = {
+  [STATUS.IDLE]: '开始',
+  [STATUS.RUNNING]: '暂停',
+  [STATUS.PAUSED]: '继续',
+};
+
 let settings = loadSettings();
 let records = loadRecords();
+let permissionRequested = false;
 
 const timer = new Timer({
   durationsMs: {
@@ -49,61 +56,188 @@ const timer = new Timer({
   onFinish: () => handleFinish(),
 });
 
+/* ---------- 4a 渲染 ---------- */
+
 function render() {
-  // TODO: 更新时间文本（Math.ceil(left/1000) → MM:SS）
-  // TODO: 更新主按钮文案（开始 / 暂停 / 继续）
-  // TODO: 更新模式标签、模式按钮的激活态
-  // TODO: 更新今日 / 本周统计数字
-  // TODO: 更新 document.title（"24:59 · 专注中" / "已暂停" / "番茄钟"）
+  const remainingText = formatTime(timer.getRemainingMs());
+
+  el.timeDisplay.textContent = remainingText;
+  el.primaryBtn.textContent = PRIMARY_LABELS[timer.status];
+  el.modeTag.textContent = MODE_LABELS[timer.mode];
+  el.focusModeBtn.classList.toggle('is-active', timer.mode === MODES.FOCUS);
+  el.breakModeBtn.classList.toggle('is-active', timer.mode === MODES.BREAK);
+
+  el.todayCount.textContent = String(countSince(startOfToday()));
+  el.weekCount.textContent = String(countSince(startOfWeek()));
+
+  document.title = buildTitle(timer.status, remainingText);
+}
+
+function buildTitle(status, remainingText) {
+  if (status === STATUS.RUNNING) return `${remainingText} · ${MODE_LABELS[timer.mode]}中`;
+  if (status === STATUS.PAUSED) return `${remainingText} · 已暂停`;
+  return '番茄钟';
 }
 
 function showNotice(text) {
-  // TODO: 写入 el.notice 并取消 hidden
+  el.notice.textContent = text;
+  el.notice.hidden = false;
 }
 
+/* ---------- 4d 统计 ---------- */
+
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
+/** 本周起点：周一 00:00（本地时区） */
+function startOfWeek() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  const day = (d.getDay() + 6) % 7;
+  return d.getTime() - day * 86400000;
+}
+
+function countSince(from) {
+  return records.filter((record) => record.ts >= from).length;
+}
+
+/* ---------- 4b 主流程事件 ---------- */
+
+function onPrimaryClick() {
+  // 首次点击在用户手势内请求通知权限并解锁音频
+  if (!permissionRequested) {
+    permissionRequested = true;
+    ensurePermission().then(handlePermissionState).catch(() => {});
+  }
+  unlockAudio();
+
+  if (timer.status === STATUS.IDLE) timer.start();
+  else if (timer.status === STATUS.RUNNING) timer.pause();
+  else if (timer.status === STATUS.PAUSED) timer.resume();
+
+  render();
+}
+
+function handlePermissionState(state) {
+  if (state === 'unsupported') {
+    showNotice('当前浏览器不支持系统通知，将使用页面内提醒。');
+  } else if (state === 'denied') {
+    showNotice('通知权限已被拒绝，可在浏览器地址栏左侧重新开启；本次使用页面内提醒。');
+  }
+}
+
+function switchMode(mode) {
+  if (!timer.setMode(mode)) {
+    showNotice('请先重置计时器，再切换模式');
+    return;
+  }
+  render();
+}
+
+/* ---------- 4c 设置项 ---------- */
+
+/** 输入框取值：只接受 1–120 的整数分钟，非法返回 null */
+function toMinutes(raw) {
+  const text = String(raw).trim();
+  if (!/^\d{1,3}$/.test(text)) return null;
+  const value = Number(text);
+  if (!Number.isInteger(value) || value < 1 || value > 120) return null;
+  return value;
+}
+
+function onSaveSettings() {
+  if (timer.status !== STATUS.IDLE) {
+    showNotice('请先重置计时器，再修改时长');
+    return;
+  }
+
+  const focus = toMinutes(el.focusInput.value);
+  const breakMinutes = toMinutes(el.breakInput.value);
+  if (focus === null || breakMinutes === null) {
+    showNotice('时长需为 1–120 的整数分钟');
+    return;
+  }
+
+  settings = { ...settings, focus, break: breakMinutes };
+  saveSettings(settings);
+  timer.setDuration(MODES.FOCUS, focus);
+  timer.setDuration(MODES.BREAK, breakMinutes);
+
+  showNotice('时长设置已保存');
+  render();
+}
+
+function onSoundToggleChange() {
+  const enabled = el.soundToggle.checked;
+  setSoundEnabled(enabled);
+  settings = { ...settings, sound: enabled };
+  saveSettings(settings);
+  showNotice(enabled ? '提示音已开启' : '提示音已关闭');
+}
+
+/* ---------- 4d 清空记录 ---------- */
+
+function onClearRecords() {
+  const confirmed = window.confirm('确定清空全部完成记录吗？此操作不可撤销。');
+  if (!confirmed) return;
+
+  clearRecords();
+  records = loadRecords();
+  showNotice('记录已清空');
+  render();
+}
+
+/* ---------- 4e 到时处理 ---------- */
+
 function handleFinish() {
-  // TODO: 播放提示音 + 发送通知 + 页面内提示
-  // TODO: 专注完成时 addRecord；自动切换模式但不自动开始
-  // TODO: 调用 render()
+  const finishedMode = timer.mode;
+  const message = MESSAGES[finishedMode] || MESSAGES.focus;
+
+  playChime();
+  notify(message.title, message.body);
+  showNotice(message.title);
+
+  if (finishedMode === MODES.FOCUS) {
+    addRecord(Date.now());
+    records = loadRecords();
+  }
+
+  // 自动切到下一个模式，但不自动开始
+  timer.setMode(finishedMode === MODES.FOCUS ? MODES.BREAK : MODES.FOCUS);
+  render();
+}
+
+/* ---------- 4f 后台校正 ---------- */
+
+function onVisibilityChange() {
+  if (document.visibilityState !== 'visible') return;
+  timer.tick();
+  render();
 }
 
 function bindEvents() {
-  el.primaryBtn.addEventListener('click', () => {
-    // TODO: 首次点击时 ensurePermission() + unlockAudio()；再按 status 分发 start / pause / resume
-  });
-
+  el.primaryBtn.addEventListener('click', onPrimaryClick);
   el.resetBtn.addEventListener('click', () => {
-    // TODO: timer.reset()
+    timer.reset();
+    render();
   });
-
-  el.focusModeBtn.addEventListener('click', () => {
-    // TODO: timer.setMode(MODES.FOCUS)
-  });
-
-  el.breakModeBtn.addEventListener('click', () => {
-    // TODO: timer.setMode(MODES.BREAK)
-  });
-
-  el.saveSettingsBtn.addEventListener('click', () => {
-    // TODO: 校验 1–120 整数；非 IDLE 时提示"请先重置计时器"；否则写 settings 并 saveSettings()
-  });
-
-  el.soundToggle.addEventListener('change', () => {
-    // TODO: setSoundEnabled() 并写回 settings / saveSettings()
-  });
-
-  el.clearRecordsBtn.addEventListener('click', () => {
-    // TODO: 二次确认后 clearRecords() 并 render()
-  });
-
-  document.addEventListener('visibilitychange', () => {
-    // TODO: 切回前台时 timer.tick() 补一次校正
-  });
+  el.focusModeBtn.addEventListener('click', () => switchMode(MODES.FOCUS));
+  el.breakModeBtn.addEventListener('click', () => switchMode(MODES.BREAK));
+  el.saveSettingsBtn.addEventListener('click', onSaveSettings);
+  el.soundToggle.addEventListener('change', onSoundToggleChange);
+  el.clearRecordsBtn.addEventListener('click', onClearRecords);
+  document.addEventListener('visibilitychange', onVisibilityChange);
 }
 
 function init() {
-  // TODO: 用 settings 回填输入框与提示音开关
+  el.focusInput.value = String(settings.focus);
+  el.breakInput.value = String(settings.break);
+  el.soundToggle.checked = settings.sound;
   setSoundEnabled(settings.sound);
+
   bindEvents();
   render();
 }
