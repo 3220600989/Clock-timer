@@ -4,7 +4,7 @@
 
 - 原生 HTML + CSS + JavaScript（ES Modules），无构建步骤。
 - 持久化：LocalStorage。
-- 提醒：Notification API + `Audio`。
+- 提醒：Notification API + `Web Audio`（网页音频合成接口，实时合成提示音，不依赖音频文件）。
 - 部署：任意静态托管。
 
 ## 2. 文件结构
@@ -17,7 +17,7 @@
 ├── timer.js        # 计时核心（基于时间戳）
 ├── storage.js      # LocalStorage 读写
 ├── notify.js       # 通知 + 提示音
-└── assets/chime.mp3
+└── assets/         # 静态资源目录（提示音由 Web Audio 合成，此处无音频文件）
 ```
 
 ## 3. 数据模型（LocalStorage）
@@ -89,10 +89,14 @@ export async function ensurePermission() {
 
 ## 7. 提示音
 
-- `const audio = new Audio('assets/chime.mp3'); audio.volume = 0.6;`
-- 解锁：首次点击开始时 `audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {})`。
-- 播放：`audio.currentTime = 0; audio.play().catch(() => {/* 静默失败 */})`。
-- 开关关闭时直接跳过。
+用 Web Audio 实时合成，不引入音频二进制文件（满足首屏 <100KB 约束）。
+
+- 惰性创建 `AudioContext`：首次播放时才创建，创建失败或浏览器不支持时静默降级为无声。
+- 解锁：首次点击开始时（用户手势内）创建并 `resume()`，`resume()` 的 Promise 必须 `.catch()`。
+- 合成：两个正弦振荡器 880Hz（主音）与 1174.66Hz（辅音，延迟 0.16s 进入），各接一条指数包络
+  （起音 0.0001 → 12ms 冲到峰值 → 指数衰减回 0.0001），经主增益 0.6 输出到 `destination`。
+- 开关关闭时直接跳过播放。
+- 合成过程整体包 try/catch，失败不影响计时逻辑。
 
 ## 8. 统计逻辑
 
