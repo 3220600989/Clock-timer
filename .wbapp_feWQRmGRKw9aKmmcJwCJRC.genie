@@ -1,0 +1,5 @@
+appId: wbapp_feWQRmGRKw9aKmmcJwCJRC
+name: 番茄钟计时器
+localDir: D:\PersonalPortfolio\Clock timer
+appType: web
+entryHtml: index.html
