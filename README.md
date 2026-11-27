@@ -1,8 +1,8 @@
-# 番茄钟 Clock Timer
+# 心流 Flow
 
 [![GitHub Pages](https://img.shields.io/badge/在线演示-GitHub%20Pages-2ea44f)](https://3220600989.github.io/Clock-timer/)
 
-纯前端番茄钟计时器。原生 HTML / CSS / JavaScript（ES Modules），**无框架、无构建、无依赖、无后端**，首屏资源 38.3KB（gzip 后 13.3KB）。
+纯前端「心流 Flow」专注计时器。原生 HTML / CSS / JavaScript（ES Modules），**无框架、无构建、无依赖、无后端**，首屏资源 38.3KB（gzip 后 13.3KB）。
 
 - **在线演示**：<https://3220600989.github.io/Clock-timer/>（GitHub Pages）
 
@@ -17,7 +17,7 @@
 | 到时反馈 | 合成提示音 + 系统通知 + 页面内提示，完成后自动切到休息模式（不自动开始） |
 | 统计 | 今日 / 本周专注完成数，按本地时区在读取时计算，可一键清空（二次确认） |
 | 持久化 | 时长、提示音开关、完成记录写入 LocalStorage，刷新不丢 |
-| 状态可见 | 页面标题随状态变化（`24:59 · 专注中` / `· 已暂停` / `番茄钟`） |
+| 状态可见 | 页面标题随状态变化（`24:59 · 专注中` / `· 已暂停` / `心流 Flow`） |
 
 ## 运行
 

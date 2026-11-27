@@ -83,7 +83,7 @@ function render() {
 function buildTitle(status, remainingText) {
   if (status === STATUS.RUNNING) return `${remainingText} · ${MODE_LABELS[timer.mode]}中`;
   if (status === STATUS.PAUSED) return `${remainingText} · 已暂停`;
-  return '番茄钟';
+  return '心流 Flow';
 }
 
 function showNotice(text) {

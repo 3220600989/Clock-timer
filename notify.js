@@ -7,7 +7,7 @@
 
 export const MESSAGES = {
   focus: { title: '专注完成！休息一下吧', body: '专注周期已完成，休息一下吧。' },
-  break: { title: '休息结束，开始下一个番茄', body: '休息结束，开始下一个番茄。' },
+  break: { title: '休息结束，进入下一段心流', body: '休息结束，进入下一段心流。' },
 };
 
 /** 主音量，对应原 Audio 方案的 volume = 0.6 */
