@@ -11,7 +11,7 @@
 | timer.js | 计时状态机 idle/running/paused + focus/break，200ms tick | 已实现并验证 |
 | notify.js | 通知 + 提示音（Web Audio 合成音） | 已实现并验证 |
 | app.js | 唯一操作 DOM 的集成层 | 已实现并验证 |
-| index.html / styles.css | 界面（14 个 id 与 app.js 一致；已加 data: 空图标避免 favicon 404） | 已接线 |
+| index.html / styles.css | 界面（14 个 id 与 app.js 一致；含 data: 空图标避免 favicon 404）。2026-11-27 重设计为「清新有机」风格：薄荷绿+珊瑚橘、呼吸进度环、渐变网格+噪点、桌面两栏/≤760px 单栏、无外部字体与图片请求。首屏 38.3KB（gzip 13.3KB） | 已接线并重新验证 |
 | assets/ | 静态资源目录，无音频文件（阶段 0 决策：改用 Web Audio 合成音） | — |
 
 ## 状态：阶段 6 已完成（已上线）

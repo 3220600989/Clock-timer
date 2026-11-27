@@ -20,6 +20,7 @@ import {
 } from './notify.js';
 
 const el = {
+  app: document.querySelector('.app'),
   modeTag: document.getElementById('mode-tag'),
   timeDisplay: document.getElementById('time-display'),
   primaryBtn: document.getElementById('primary-btn'),
@@ -60,6 +61,12 @@ const timer = new Timer({
 
 function render() {
   const remainingText = formatTime(timer.getRemainingMs());
+  const totalMs = timer.durationsMs[timer.mode];
+
+  // 视觉状态：供 CSS 驱动进度环与配色，不参与任何计时逻辑
+  el.app.dataset.mode = timer.mode;
+  el.app.dataset.status = timer.status;
+  el.app.style.setProperty('--progress', String(totalMs ? timer.getRemainingMs() / totalMs : 1));
 
   el.timeDisplay.textContent = remainingText;
   el.primaryBtn.textContent = PRIMARY_LABELS[timer.status];

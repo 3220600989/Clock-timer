@@ -3,48 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
   <title>番茄钟</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="app">
-    <h1 class="app__title">番茄钟</h1>
+  <main class="app" data-mode="focus" data-status="idle">
+    <header class="app__header">
+      <p class="app__eyebrow">专注 · 休息 · 循环</p>
+      <h1 class="app__title">番茄钟</h1>
+      <p class="app__subtitle">POMODORO</p>
+    </header>
 
-    <div class="mode-tag" id="mode-tag">专注</div>
+    <div class="stage" role="group" aria-label="计时器">
+      <!-- 装饰进度环： aria-hidden，数值由 app.js 通过 --progress 驱动 -->
+      <div class="dial" aria-hidden="true">
+        <svg class="dial__svg" viewBox="0 0 260 260" focusable="false">
+          <circle class="dial__track" cx="130" cy="130" r="112"></circle>
+          <circle class="dial__progress" cx="130" cy="130" r="112"></circle>
+        </svg>
+        <span class="dial__leaf dial__leaf--a"></span>
+        <span class="dial__leaf dial__leaf--b"></span>
+      </div>
 
-    <div class="time-display" id="time-display" aria-live="polite">25:00</div>
+      <div class="stage__center">
+        <div class="mode-tag" id="mode-tag">专注</div>
+        <div class="time-display" id="time-display" aria-live="polite">25:00</div>
+        <p class="stage__hint">保持专注，一次只做一件事</p>
+      </div>
 
-    <div class="controls">
-      <button type="button" id="primary-btn" class="btn btn--primary">开始</button>
-      <button type="button" id="reset-btn" class="btn">重置</button>
+      <div class="controls">
+        <button type="button" id="primary-btn" class="btn btn--primary">开始</button>
+        <button type="button" id="reset-btn" class="btn">重置</button>
+      </div>
+
+      <div class="mode-switch" role="group" aria-label="模式切换">
+        <button type="button" id="focus-mode-btn" class="btn btn--mode is-active">专注</button>
+        <button type="button" id="break-mode-btn" class="btn btn--mode">休息</button>
+      </div>
     </div>
 
-    <div class="mode-switch" role="group" aria-label="模式切换">
-      <button type="button" id="focus-mode-btn" class="btn btn--mode is-active">专注</button>
-      <button type="button" id="break-mode-btn" class="btn btn--mode">休息</button>
+    <div class="panel">
+      <section class="settings" aria-label="自定义时长">
+        <h2 class="panel__heading">时长设置</h2>
+        <div class="field">
+          <label for="focus-input">专注时长（分钟）</label>
+          <input type="number" id="focus-input" min="1" max="120" step="1" value="25">
+        </div>
+        <div class="field">
+          <label for="break-input">休息时长（分钟）</label>
+          <input type="number" id="break-input" min="1" max="120" step="1" value="5">
+        </div>
+        <button type="button" id="save-settings-btn" class="btn btn--save">保存设置</button>
+      </section>
+
+      <section class="sound-setting" aria-label="提示音设置">
+        <h2 class="panel__heading">提醒</h2>
+        <label class="switch" for="sound-toggle">
+          <input type="checkbox" id="sound-toggle" checked>
+          <span class="switch__track" aria-hidden="true"></span>
+          <span class="switch__label">提示音</span>
+        </label>
+      </section>
+
+      <section class="stats" aria-label="完成统计">
+        <h2 class="panel__heading">完成统计</h2>
+        <div class="stats__grid">
+          <div class="stat">
+            <span class="stat__value" id="today-count">0</span>
+            <span class="stat__label">今日完成</span>
+          </div>
+          <div class="stat">
+            <span class="stat__value" id="week-count">0</span>
+            <span class="stat__label">本周完成</span>
+          </div>
+        </div>
+        <button type="button" id="clear-records-btn" class="btn btn--danger">清空记录</button>
+      </section>
     </div>
-
-    <section class="settings" aria-label="自定义时长">
-      <label for="focus-input">专注时长（分钟）</label>
-      <input type="number" id="focus-input" min="1" max="120" step="1" value="25">
-      <label for="break-input">休息时长（分钟）</label>
-      <input type="number" id="break-input" min="1" max="120" step="1" value="5">
-      <button type="button" id="save-settings-btn" class="btn">保存设置</button>
-    </section>
-
-    <section class="sound-setting" aria-label="提示音设置">
-      <label for="sound-toggle">
-        <input type="checkbox" id="sound-toggle" checked>
-        提示音
-      </label>
-    </section>
-
-    <section class="stats" aria-label="完成统计">
-      <div>今日完成：<span id="today-count">0</span></div>
-      <div>本周完成：<span id="week-count">0</span></div>
-      <button type="button" id="clear-records-btn" class="btn btn--danger">清空记录</button>
-    </section>
 
     <div class="notice" id="notice" role="status" aria-live="polite" hidden></div>
   </main>

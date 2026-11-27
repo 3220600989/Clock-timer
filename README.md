@@ -2,7 +2,7 @@
 
 [![GitHub Pages](https://img.shields.io/badge/在线演示-GitHub%20Pages-2ea44f)](https://3220600989.github.io/Clock-timer/)
 
-纯前端番茄钟计时器。原生 HTML / CSS / JavaScript（ES Modules），**无框架、无构建、无依赖、无后端**，首屏资源 21.3KB（gzip 后 8.2KB）。
+纯前端番茄钟计时器。原生 HTML / CSS / JavaScript（ES Modules），**无框架、无构建、无依赖、无后端**，首屏资源 38.3KB（gzip 后 13.3KB）。
 
 - **在线演示**：<https://3220600989.github.io/Clock-timer/>（GitHub Pages）
 
@@ -37,6 +37,8 @@ python3 -m http.server 8080
 **提示音零资源依赖。** 用 Web Audio API 实时合成「叮」声——880Hz 与 1174.66Hz 两个正弦音（辅音延迟 0.16s 进入），各接指数包络（0.0001 起音 → 12ms 冲峰 → 指数衰减回 0.0001），主增益 0.6。不依赖任何二进制音频文件，仓库里没有 mp3。
 
 **通知权限四态。** `unsupported` / `granted` / `denied` / 请求中。被用户拒绝后**不再重复请求**；请求抛错按 `denied` 处理；未授权时降级为页面内提醒，不阻断计时。
+
+**界面视觉。** 自然有机方向：薄荷绿主色 + 珊瑚橘强调色（60/30/10），记忆点是一个**会呼吸的进度圆环**——环的 `stroke-dashoffset` 由 `--progress` 驱动，随剩余时间收紧；专注薄荷绿、休息珊瑚橘，运行时缓慢呼吸。数字用 Bahnschrift / DIN Alternate 等本机几何字体（无网络字体请求，离线同样成立），背景为渐变网格 + SVG 噪点纹理。桌面两栏、≤760px 单栏，全部动效在 `prefers-reduced-motion: reduce` 下关闭。视觉状态通过 `.app` 上的 `data-mode` / `data-status` 属性交给 CSS，不参与任何计时逻辑。
 
 ## 目录结构
 
