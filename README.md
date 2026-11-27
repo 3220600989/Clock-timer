@@ -1,6 +1,10 @@
 # 番茄钟 Clock Timer
 
+[![GitHub Pages](https://img.shields.io/badge/在线演示-GitHub%20Pages-2ea44f)](https://3220600989.github.io/Clock-timer/)
+
 纯前端番茄钟计时器。原生 HTML / CSS / JavaScript（ES Modules），**无框架、无构建、无依赖、无后端**，首屏资源 21.3KB（gzip 后 8.2KB）。
+
+- **在线演示**：<https://3220600989.github.io/Clock-timer/>（GitHub Pages）
 
 核心难点是**倒计时准确性**与**通知 / 音频的浏览器策略兼容**，两处都已在真实浏览器中实测通过。
 
@@ -50,11 +54,14 @@ assets/         # 静态资源目录（当前无音频文件）
 
 ## 部署
 
-本项目是纯静态文件，任意静态托管即可。两种已验证的方式：
+本项目是纯静态文件，任意静态托管即可。本仓库采用 **GitHub Pages**，发布源为 `gh-pages` 分支（仓库根目录即站点根目录）。
 
-**GitHub Pages**：仓库 `Settings → Pages → Build and deployment → Source` 选 `Deploy from a branch`，分支 `main`、目录 `/ (root)`。仓库根目录已放 `.nojekyll`，Pages 会原样发布静态文件不做 Jekyll 处理。随后访问 `https://3220600989.github.io/Clock-timer/`。
+- `gh-pages` 分支由 `.github/workflows/pages.yml` 在 `main` 有更新时自动同步——该工作流**不做任何构建、打包或依赖安装**，只把同一份文件推到 `gh-pages`。
+- 手动发布一条命令：`git push origin main:gh-pages`。
+- 首次启用 Pages 的经验：推上 `gh-pages` 分支即可让仓库自动开启 Pages，无需进设置页手动配置。
+- 线上地址：<https://3220600989.github.io/Clock-timer/>
 
-**WorkBuddy 应用发布**：将本目录作为静态站点发布，产出公网可访问链接。
+另有 WorkBuddy 应用发布通道，产出公网链接 `https://pomodoro-timer-71459.app.workbuddy.host/?sharecode=RNPXKWGTF6`，可在「设置—数据管理—应用」中管理。
 
 ## 验收结论
 

@@ -14,7 +14,18 @@
 | index.html / styles.css | 界面（14 个 id 与 app.js 一致；已加 data: 空图标避免 favicon 404） | 已接线 |
 | assets/ | 静态资源目录，无音频文件（阶段 0 决策：改用 Web Audio 合成音） | — |
 
-## 状态：阶段 5 已完成（端到端验收通过）
+## 状态：阶段 6 已完成（已上线）
+阶段 5 验收通过后补完最后一环——上线与交付收尾：
+- **GitHub Pages**：发布源为 `gh-pages` 分支（仓库根目录即站点根目录），线上 https://3220600989.github.io/Clock-timer/ ——已实测 HTTP 200 且 6 个静态资源（index/styles/app/timer/storage/notify）全部 200，MIME 类型正确（模块可加载）。
+- **WorkBuddy 应用发布**：https://pomodoro-timer-71459.app.workbuddy.host/?sharecode=RNPXKWGTF6 （实测 HTTP 200，关键 DOM id 齐全）。
+- 交付物：README.md（功能、技术要点、运行、目录、部署、验收结论）、.nojekyll、.github/workflows/pages.yml（只做分支同步，不构建）。
+
+## 部署要点（下次直接照做）
+- **开启 Pages 不必进设置页**：推一条 `git push origin main:gh-pages` 即可让仓库自动启用 Pages（实测 has_pages 由 False 变 True、站点立即可访问）。
+- **actions/deploy-pages 工作流在 Pages 未启用时必失败**（失败步骤为「配置 Pages」），因为它要求发布源是 GitHub Actions 而非分支。故本项目工作流改为「同步 main → gh-pages」的轻量分支同步，不做构建。
+- 手动发布：`git push origin main:gh-pages`；工作流会在 main 有更新时自动同步。
+
+## 阶段 5 已完成（端到端验收通过）
 PRD §5 五项 + AGENTS.md 九项 + PRD §4 非功能需求全部实测通过。脚本在 `%TEMP%/pomo-verify/s5/`（不进仓库）：
 - `drive-stage5.mjs` 主驱动（场景 1–9，80/82，两处失败均为脚本自身时序/断言问题，已修正并单独复测通过）
 - `drive-basic-only.mjs` 场景 1 复测 31/31；`drive-finish-only.mjs` 场景 5 复测 15/15
@@ -52,5 +63,6 @@ PRD §5 五项 + AGENTS.md 九项 + PRD §4 非功能需求全部实测通过。
 
 ## 环境坑（已解决，勿重踩）
 - **Git 代理**：代理软件（Clash，端口 7892）关闭时，Git 全局代理必须 `git config --global --unset http.proxy` 与 `--unset https.proxy`，否则推送报 `Failed to connect to github.com:443 over proxy 127.0.0.1`。当前状态：无代理配置，直连可用。
+- **DNS 污染（下午再次出现）**：github.com 被解析到不可达 IP，必须用 `git -c http.proxy= -c https.proxy= -c "http.curloptResolve=github.com:443:<可达IP>" push` 绕过；且单个 IP 会时好时坏（140.82.113.3 先成功后失败，140.82.114.3 成功），要准备多个 IP 轮换重试。
 - **NTFS ACL**：Windows 新建目录继承权限不含删除权，导致 git 报 `index.lock` / `Another git process` / 写对象 `Permission denied`。修复：`icacls <path> /grant "LAPTOP-Q0LAN6BN\Lenovo:(OI)(CI)(F)"`。
 - 父目录 `D:/PersonalPortfolio` 不建 git 仓库，两个子项目各自独立管理。

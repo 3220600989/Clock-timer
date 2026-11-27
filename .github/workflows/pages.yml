@@ -1,39 +1,25 @@
-name: Deploy to GitHub Pages
+name: Publish to GitHub Pages
 
-# 仅用于把仓库里的静态文件发布到 GitHub Pages，不参与应用构建：
-# 应用本身是无构建的纯静态站点，本工作流不做任何打包、转译或依赖安装。
+# GitHub Pages 的发布源为 gh-pages 分支（仓库根目录即站点根目录）。
+# 本工作流不构建、不打包、不安装依赖，只在 main 有更新时把同一份文件同步到 gh-pages。
 on:
   push:
     branches: ["main"]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: pages
+  group: pages-publish
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: 检出仓库
         uses: actions/checkout@v4
 
-      - name: 配置 Pages
-        uses: actions/configure-pages@v5
-
-      - name: 上传静态文件
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-
-      - name: 发布到 GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: 同步 main 到 gh-pages
+        run: git push --force origin HEAD:refs/heads/gh-pages
