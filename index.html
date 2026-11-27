@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>番茄钟</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <h1 class="app__title">番茄钟</h1>
+
+    <div class="mode-tag" id="mode-tag">专注</div>
+
+    <div class="time-display" id="time-display" aria-live="polite">25:00</div>
+
+    <div class="controls">
+      <button type="button" id="primary-btn" class="btn btn--primary">开始</button>
+      <button type="button" id="reset-btn" class="btn">重置</button>
+    </div>
+
+    <div class="mode-switch" role="group" aria-label="模式切换">
+      <button type="button" id="focus-mode-btn" class="btn btn--mode is-active">专注</button>
+      <button type="button" id="break-mode-btn" class="btn btn--mode">休息</button>
+    </div>
+
+    <section class="settings" aria-label="自定义时长">
+      <label for="focus-input">专注时长（分钟）</label>
+      <input type="number" id="focus-input" min="1" max="120" step="1" value="25">
+      <label for="break-input">休息时长（分钟）</label>
+      <input type="number" id="break-input" min="1" max="120" step="1" value="5">
+      <button type="button" id="save-settings-btn" class="btn">保存设置</button>
+    </section>
+
+    <section class="sound-setting">
+      <label for="sound-toggle">
+        <input type="checkbox" id="sound-toggle" checked>
+        提示音
+      </label>
+    </section>
+
+    <section class="stats" aria-label="完成统计">
+      <div>今日完成：<span id="today-count">0</span></div>
+      <div>本周完成：<span id="week-count">0</span></div>
+      <button type="button" id="clear-records-btn" class="btn btn--danger">清空记录</button>
+    </section>
+
+    <div class="notice" id="notice" role="status" aria-live="polite" hidden></div>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
