@@ -1,7 +1,7 @@
-# 项目长期记忆：番茄钟 Clock timer
+# 项目长期记忆：心流 Flow（Clock Timer）
 
 ## 定位
-纯前端番茄钟 SPA：原生 HTML/CSS/JS（ES Modules），无框架/构建/后端，静态托管，首屏 <100KB。
+纯前端「心流 Flow」专注计时 SPA（原名番茄钟，2026-11-27 改）：原生 HTML/CSS/JS（ES Modules），无框架/构建/后端，静态托管，首屏 <100KB。改名只动用户可见文案；`pomo.settings` / `pomo.records`、通知 tag、仓库与已发布 URL 均为技术标识 / 既有链接，保持不变。
 仓库 https://github.com/3220600989/Clock-timer.git（分支 main）。规格文档：PRD.md / TECH_DESIGN.md / AGENTS.md。
 
 ## 模块状态
